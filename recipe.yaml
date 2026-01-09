@@ -1,0 +1,90 @@
+context:
+  name: behaviortree_cpp
+  version: "4.8.2"
+
+package:
+  name: ${{ name }}
+  version: ${{ version }}
+
+source:
+  - path: .
+
+build:
+  number: 0
+  script:
+    - mkdir build
+    - cd build
+    - if: unix
+      then:
+        - cmake ${CMAKE_ARGS} -GNinja ..
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_INSTALL_PREFIX=$PREFIX
+          -DBTCPP_SHARED_LIBS=ON
+          -DBTCPP_BUILD_TOOLS=ON
+          -DBTCPP_EXAMPLES=OFF
+          -DBUILD_TESTING=OFF
+          -DBTCPP_GROOT_INTERFACE=ON
+          -DBTCPP_SQLITE_LOGGING=ON
+          -DUSE_VENDORED_CPPZMQ=OFF
+          -DUSE_VENDORED_FLATBUFFERS=ON
+          -DUSE_VENDORED_LEXY=ON
+          -DUSE_VENDORED_MINICORO=ON
+          -DUSE_VENDORED_MINITRACE=ON
+      else:
+        - cmake %CMAKE_ARGS% -GNinja ..
+          -DCMAKE_BUILD_TYPE=Release
+          -DCMAKE_INSTALL_PREFIX=%LIBRARY_PREFIX%
+          -DBTCPP_SHARED_LIBS=ON
+          -DBTCPP_BUILD_TOOLS=ON
+          -DBTCPP_EXAMPLES=OFF
+          -DBUILD_TESTING=OFF
+          -DBTCPP_GROOT_INTERFACE=ON
+          -DBTCPP_SQLITE_LOGGING=ON
+          -DUSE_VENDORED_CPPZMQ=OFF
+          -DUSE_VENDORED_FLATBUFFERS=ON
+          -DUSE_VENDORED_LEXY=ON
+          -DUSE_VENDORED_MINICORO=ON
+          -DUSE_VENDORED_MINITRACE=ON
+    - cmake --build . --config Release
+    - cmake --install . --config Release
+
+requirements:
+  build:
+    - ${{ compiler('c') }}
+    - ${{ compiler('cxx') }}
+    - cmake >=3.16.3
+    - ninja
+  host:
+    - libsqlite
+    - zeromq
+    - cppzmq
+  run:
+    - libsqlite
+    - zeromq
+    - cppzmq
+
+tests:
+  - script:
+    - if: unix
+      then:
+        - test -f $PREFIX/lib/libbehaviortree_cpp$SHLIB_EXT
+        - test -f $PREFIX/include/behaviortree_cpp/bt_factory.h
+      else:
+        - if not exist %LIBRARY_LIB%\\behaviortree_cpp.lib exit 1
+        - if not exist %LIBRARY_INC%\\behaviortree_cpp\\bt_factory.h exit 1
+
+about:
+  homepage: https://www.behaviortree.dev
+  repository: https://github.com/BehaviorTree/BehaviorTree.CPP
+  documentation: https://www.behaviortree.dev/docs/intro
+  license: MIT
+  license_file: LICENSE
+  summary: Behavior Trees Library in C++
+  description: |
+    BehaviorTree.CPP is a C++ implementation of Behavior Trees.
+    It provides the building blocks to create and execute behavior trees
+    for complex decision making in robotics and games.
+
+extra:
+  recipe-maintainers:
+    - neverorfrog
