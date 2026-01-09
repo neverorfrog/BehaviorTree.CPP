@@ -1,10 +1,23 @@
-[project]
+[workspace]
 name = "BehaviorTree.CPP"
-version = "4.5.2"
+version = "4.8.3"
 description = "This C++ 17 library provides a framework to create BehaviorTrees"
 authors = ["Tony Paulussen <T.paulussen@gmail.com>"]
 channels = ["conda-forge"]
-platforms = ["linux-64", "win-64"]
+platforms = ["linux-64", "linux-aarch64"]
+preview = ["pixi-build"]
+
+[package]
+name = "btcpp"
+version = "4.8.3"
+
+[package.build.backend]
+channels = [
+  "https://prefix.dev/pixi-build-backends",
+  "https://prefix.dev/conda-forge",
+]
+name = "pixi-build-cmake"
+version = "==0.3.6"
 
 [target.win-64.tasks]
 test = "PATH=\"$PATH;build/Release\" build/tests/Release/behaviortree_cpp_test.exe"
@@ -12,18 +25,20 @@ test = "PATH=\"$PATH;build/Release\" build/tests/Release/behaviortree_cpp_test.e
 [target.linux-64.tasks]
 test = "./build/tests/behaviortree_cpp_test"
 
-[tasks]
-build = "mkdir -p build && cd build && cmake ../ -DCMAKE_BUILD_TYPE=Release && cmake --build . --parallel --config Release"
-
-[dependencies]
+[package.host-dependencies]
 cmake = ">=3.16.3"
 gmock = "1.14.*"
 sqlite = "3.40.*"
 zeromq = "4.3.*"
 gtest = "1.14.*"
 cxx-compiler = "*"
-
 pre-commit = "*"
 
-[target.linux-64.dependencies]
-make = "*"
+[package.build.config]
+extra-args = [
+    "-DCMAKE_BUILD_TYPE=Release",
+    "-DBTCPP_GROOT_INTERFACE=OFF",
+    "-DBTCPP_SQLITE_LOGGING=OFF",
+    "-DBUILD_TESTING=OFF",
+    "-DBTCPP_EXAMPLES=OFF",
+]
